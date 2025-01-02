@@ -1,0 +1,144 @@
+import fasttools.jtools.dss.api.Dss;
+import fasttools.jtools.dss.api.IDataSet;
+import fasttools.jtools.dss.api.IRecord;
+import fasttools.processfast.*;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+
+public class SMS_ITEM_MAP_H extends WF_B {
+    private static final Integer SMS_ITEM_MAP_MESSAGE_CLEAR_TIMER = 6;
+    Signal sSourceItem = defineStringSignal();
+    Signal sDestItem = defineStringSignal();
+    Signal sAddItem = defineIntegerSignal(Signal.Trigger.VALUE);
+    Signal sMessage = defineStringSignal();
+    Signal sMsgActive = defineIntegerSignal(Signal.Trigger.VALUE);
+
+    HashMap<String,String> mapSMSItems = new HashMap<>();
+    Timer MessageClearTimer = defineTimer();
+    MessageClearListener MessageClearListenerObj = new MessageClearListener();
+
+    @Override
+    public void create() {
+        super.create();
+        createItemForSignal(sSourceItem, "EQP-TAS.Templates.Items.STRING_TEMPLATE", "NAME", getName() + ".SourceItem");
+        createItemForSignal(sDestItem, "EQP-TAS.Templates.Items.STRING_TEMPLATE", "NAME", getName() + ".DestinationItem");
+        createItemForSignal(sAddItem, "EQP-TAS.Templates.Items.INTEGER_TEMPLATE", "NAME", getName() + ".Add");
+        createItemForSignal(sMessage, "EQP-TAS.Templates.Items.STRING_TEMPLATE", "NAME", getName() + ".Message");
+        createItemForSignal(sMsgActive, "EQP-TAS.Templates.Items.INTEGER_TEMPLATE", "NAME", getName() + ".ActiveMessage");
+    }
+
+    @Override
+    public void start() {
+        try {
+            super.start();
+
+            MessageClearTimer.setTime(SMS_ITEM_MAP_MESSAGE_CLEAR_TIMER);
+            MessageClearTimer.setRepeat(false);
+            MessageClearTimer.start();
+
+            MessageClearTimer.addTimerListener(MessageClearListenerObj);
+        } catch (Exception e) {
+            systemMessage(e.getMessage() + " start");
+        }
+    }
+
+    @Override
+    public void eqptasTriggerGroupEvent(TriggerGroup triggerGroup) {
+
+    }
+
+    @Override
+    public void signalEvent(Signal signal) {
+        if(signal == sAddItem) {
+            if (signal.getValueAsInteger() == 1) {
+                insertMapItemToDataset(sSourceItem.getValueAsString(),sDestItem.getValueAsString());
+            }
+        }
+         if (signal == sMsgActive) {
+        if (sMsgActive.getValueAsInteger() == 0) {
+            // Clear the message when MsgActive is 0
+            sMessage.setValue("");  // Clear the message signal
+        }
+    }
+    }
+
+    private void insertMapItemToDataset(String srcItem, String destinationItem){
+        try{
+            IDataSet mSMSItemsMapDataset = dssInit.getDataSet("TAS_BPCL_SMS_ITEMS_MAP_DF",Dss.OPERATION_RUDI);
+
+            mSMSItemsMapDataset.rewind();
+            mapSMSItems.clear();
+            IRecord mSMSItemMap = mSMSItemsMapDataset.readNext();
+            while (mSMSItemMap != null) {
+                String szSource,szDestination;
+                szSource = mSMSItemMap.getStringField("SOURCE_ITEM");
+                szDestination = mSMSItemMap.getStringField("DESTINATION_ITEM");
+                mapSMSItems.put(szSource, szDestination);
+                mSMSItemMap = mSMSItemsMapDataset.readNext();
+            }
+
+            mSMSItemsMapDataset.rewind();
+            IRecord mRecord = mSMSItemsMapDataset.createRecord();
+
+            mRecord.setStringField("NAME", LocalDateTime.now().toString());
+            mRecord.setStringField("SOURCE_ITEM",srcItem);
+            mRecord.setStringField("DESTINATION_ITEM",destinationItem);
+            if(mapSMSItems.containsKey(srcItem)){
+                setDisplayMessage( "["+ srcItem + "] Source item already mapped");
+            }else if (mapSMSItems.containsValue(destinationItem)){
+                setDisplayMessage("["+ destinationItem+ "] Destination item already mapped");
+            } else {
+                boolean bAddItem = true;
+                String szMessageToDisplay = "";
+                if(srcItem.length() == 0 || destinationItem.length()==0){
+                    bAddItem = false;
+                    szMessageToDisplay = "Source/Destination item is empty";
+                }else {
+                    try {
+                        String szTemp = getItemValueAsString(srcItem);
+                    }catch (Exception ex){
+                        szMessageToDisplay ="Source item is not valid. ";
+                        bAddItem = false;
+                    }
+                    try {
+                        String szTemp = getItemValueAsString(destinationItem);
+                    }catch (Exception ex){
+                        szMessageToDisplay =szMessageToDisplay + " Destination item is not valid.";
+                        bAddItem = false;
+                    }
+                }
+
+                if(bAddItem){
+                    mSMSItemsMapDataset.insertRecord(mRecord);
+                }else {
+                    setDisplayMessage(szMessageToDisplay);
+                }
+            }
+
+        }catch (Exception e){
+            systemMessage(e.getMessage() + " insertMapItemToDataset");
+        }
+    }
+
+    private class MessageClearListener implements TimerListener {
+        public void timerEvent(Timer timer) {
+            try {
+         //       sMessage.setValue("");
+           //     sMsgActive.setValue(0);
+            }catch (Exception e){
+                systemMessage(e.getMessage() + " MessageClearListener:timerEvent ");
+            }
+        }
+    }
+
+    private void setDisplayMessage(String szMessage){
+        sMessage.setValue(szMessage);
+        sMsgActive.setValue(1);
+   //     MessageClearTimer.start();
+    }
+
+}
+
+
+
