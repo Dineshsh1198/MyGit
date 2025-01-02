@@ -1,0 +1,224 @@
+import fasttools.jtools.dss.api.IDataSet;
+import fasttools.jtools.dss.api.IRecord;
+import fasttools.processfast.Signal;
+import fasttools.processfast.TriggerGroup;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import java.time.LocalDateTime;
+
+public class DET_HH extends WF_B {
+  private String logText = null;
+  Signal sCardNumber = defineDoubleSignal();
+
+  private String ReportedTruckItem = "EQP-TAS.Terminal.Others.ReportingDET.TruckNo";
+  private String SealingDET = "EQP-TAS.Terminal.Others.SealingDET";
+  private String SealingCR = "EQP-TAS.Terminal.Others.SealingCR";
+
+  public void create() {
+
+    createItemForSignal(sCardNumber, "EQP-TAS.Templates.Items.REAL_TEMPLATE",
+        "NAME", getName() + ".CardNumber", "ALARMING", false);
+  }
+
+  public void triggerGroupEvent(TriggerGroup triggerGroup) {
+    if(OrderStateCodeMap().size() == 0){
+      super.start();
+      return;
+    }
+    // For sealing truck from DET
+    handleSealing();
+    // For reporting truck from DET
+    handleReportedTruckDET();
+  }
+
+  private void handleSealing() {
+    try {
+      Long mCardID = getItemValueAsLong(SealingCR + ".CardId");
+      String currentPageStatus = getItemValueAsString(SealingDET + ".CurrentPageStatus");
+
+      switch (currentPageStatus) {
+        case "0":
+          setItemValue(SealingDET + ".CardStatus", "0");
+          setItemValue(SealingDET + ".PageNo", "0");
+          setItemValue(SealingDET + ".Decline", "0");
+          setItemValue(SealingDET + ".ConcatLockNo", "");
+          setItemValue(SealingDET + ".CustomerName", "");
+          setItemValue(SealingDET + ".LockNo", "0");
+          setItemValue(SealingDET + ".TruckNo", "");
+          setItemValue(SealingDET + ".TruckStatus", "0");
+          if (mCardID != 0) {
+            logText = "Card : " + mCardID + " swiped at sealing bay";
+            eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+            logText = "DET is not in sealing state";
+            eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+            setItemValue(SealingCR + ".CardId", "0");
+          }
+          break;
+        case "1":
+          if (mCardID != 0) {
+            logText = "Card : " + mCardID + " swiped at sealing bay";
+            eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+
+            IDataSet mOrderDataSet = getDataSet("order/GetOrderByCardNumber");
+            IRecord mOrderRecord = mOrderDataSet.readEqual(mCardID);
+
+            if (mOrderRecord == null) {
+              setItemValue(SealingCR + ".CardId", "0");
+              setItemValue(SealingDET + ".CardStatus", "1");
+
+              logText = "Invalid card : " + mCardID + " swiped at sealing bay";
+              eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+            } else {
+              if (mOrderRecord.getLongField("statusId") == OrderStateKeyMap().get("SEALED")) {
+                setItemValue(SealingCR + ".CardId", "0");
+                setItemValue(SealingDET + ".CardStatus", "2");
+                setItemValue(SealingDET + ".PageNo", "0");
+                logText = "Card : " + mCardID + " truck already sealed";
+                eqptas_log(TAS_EVENT, logText, mOrderRecord.getLongField("name"), null, null, null, null);
+              } else if (mOrderRecord.getLongField("statusId") == OrderStateKeyMap().get("TOBE_SEALED") ||
+                  mOrderRecord.getLongField("statusId") == OrderStateKeyMap().get("AT_SEALING_BAY")) {
+                if (mOrderRecord.getLongField("statusId") == OrderStateKeyMap().get("TOBE_SEALED")) {
+                  IDataSet mUpdatedDataSet = getDataSet("order");
+                  setOrderState(mOrderRecord, "AT_SEALING_BAY");
+                  mUpdatedDataSet.updateRecord(mOrderRecord);
+                }
+                setItemValue(SealingCR + ".CardId", "0");
+                setItemValue(SealingDET + ".TruckNo", mOrderRecord.getStringField("truckNo"));
+                setItemValue(SealingDET + ".LockNo", mOrderRecord.getStringField("lockNo"));
+                JSONArray orderDetails = (JSONArray) mOrderRecord.getObjectField("orderDetails");
+                JSONObject compartment = (JSONObject) orderDetails.get(0);
+                String mCustomerName = compartment.get("customerName").toString();
+                Integer mCustomerID = Integer.parseInt(compartment.get("customerId").toString());
+                setItemValue(SealingDET + ".CustomerName", mCustomerName);
+                IDataSet mCustomerDataSet = getDataSet("customer");
+                setItemValue(SealingDET + ".PageNo", "2");
+                sCardNumber.setValue(mCardID);
+              } else {
+                setItemValue(SealingCR + ".CardId", "0");
+                setItemValue(SealingDET + ".CardStatus", "1");
+
+                logText = "Invalid card : " + mCardID + " swiped at sealing bay";
+                eqptas_log(TAS_EVENT, logText, mOrderRecord.getLongField("name"), null, null, null, null);
+              }
+            }
+          }
+          break;
+
+        case "2":
+          Long decline = getItemValueAsLong(SealingDET + ".Decline");
+          Long lockChange = getItemValueAsLong(SealingDET + ".LockChange");
+          if (decline == 1L) {
+            setItemValue(SealingDET + ".PageNo", "0");
+            logText = "Card : " + mCardID + " sealing declined for truck";
+            eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+          } else if (lockChange == 1L) {
+            setItemValue(SealingDET + ".PageNo", "3");
+            setItemValue(SealingDET + ".LockChange", "0");
+          } else {
+            if (mCardID != 0) {
+              logText = "Card : " + mCardID + " swiped at sealing bay";
+              eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+              IDataSet mCardDataSet = getDataSet("card/GetCardByCardNumber");
+              IRecord mCardRecord = mCardDataSet.readEqual(mCardID);
+
+              if (mCardRecord != null && (mCardRecord.getStringField("categoryCode").equals("SEALING_OFFICER"))) {
+                IDataSet mOrderDataSet = getDataSet("order/GetOrderByCardNumber");
+                IRecord mOrderRecord = mOrderDataSet.readEqual(sCardNumber.getValueAsInteger());
+
+                logText = "Card : " + mCardID + " swiped by sealing officer at sealing bay";
+                eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+
+                if (mOrderRecord != null && mOrderRecord.getLongField("statusId") == OrderStateKeyMap().get("AT_SEALING_BAY")) {
+                  IDataSet mUpdatedDataSet = getDataSet("order");
+                  setItemValue(SealingDET + ".PageNo", "5");
+                  setItemValue(SealingDET + ".TruckStatus", "1");
+                  setItemValue(SealingCR + ".CardId", "0");
+                  sCardNumber.setValue(0);
+                  setOrderState(mOrderRecord, "SEALED");
+                  mOrderRecord.setStringField("truckSealingTime", LocalDateTime.now().toString());
+                  mUpdatedDataSet.updateRecord(mOrderRecord);
+                }
+              }else {
+                logText = "Invalid sealing officer card : " + mCardID + " swiped at sealing bay";
+                eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+              }
+            }
+          }
+          break;
+        case "3":
+          if (mCardID == 0) {
+            return;
+          }
+
+          String newLockNo = getItemValueAsString(SealingDET + ".ConcatLockNo");
+          if (newLockNo.isEmpty()) {
+            return;
+          }
+
+          logText = "New lock number entered in DET : " + newLockNo + " for truck " + getItemValueAsString(SealingDET + ".TruckNo");
+          eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+
+          logText = "Card : " + mCardID + " swiped at sealing bay";
+          eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+
+          IDataSet mCardDataSet = getDataSet("card/GetCardByCardNumber");
+          IRecord mCardRecord = mCardDataSet.readEqual(mCardID);
+
+          if (mCardRecord != null && (mCardRecord.getStringField("categoryCode").equals("SEALING_OFFICER"))) {
+            IDataSet mOrderDataSet = getDataSet("order/GetOrderByCardNumber");
+            IRecord mOrderRecord = mOrderDataSet.readEqual(sCardNumber.getValueAsInteger());
+
+            if (mOrderRecord != null && mOrderRecord.getLongField("statusId") == OrderStateKeyMap().get("AT_SEALING_BAY")) {
+              IDataSet mUpdatedDataSet = getDataSet("order");
+              setItemValue(SealingDET + ".PageNo", "5");
+              setItemValue(SealingDET + ".TruckStatus", "1");
+              setItemValue(SealingCR + ".CardId", "0");
+              sCardNumber.setValue(0);
+              mOrderRecord.setStringField("lockNo", newLockNo);
+              setOrderState(mOrderRecord, "SEALED");
+              mOrderRecord.setStringField("truckSealingTime", LocalDateTime.now().toString());
+              mUpdatedDataSet.updateRecord(mOrderRecord);
+            }
+          }
+          break;
+        case "5":
+          setItemValue(SealingDET + ".PageNo", "0");
+          break;
+      }
+    } catch (Exception e) {
+      systemMessage(e.toString());
+    }
+  }
+
+  private void handleReportedTruckDET() {
+    try {
+      String mReportedTruck = getItemValueAsString(ReportedTruckItem);
+
+      if (mReportedTruck.isEmpty()) {
+        return;
+      }
+
+      logText = "Truck : " + mReportedTruck + " entered at reporting area using DET";
+      eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+
+      setItemValue(ReportedTruckItem, "");
+
+      IDataSet mTruckDataSet = getDataSet("truck/GetTruckByTruckNumber");
+      IRecord mTruckRecord = mTruckDataSet.readEqual(mReportedTruck);
+
+      if (mTruckRecord == null) {
+        logText = "Invalid card : " + mReportedTruck + " entered at reporting area using DET";
+        eqptas_log(TAS_EVENT, logText, null, null, null, null, null);
+        return;
+      }
+
+      IDataSet mDataSet = getDataSet("reportedTruck/InsertByTruckNumber");
+      IRecord mRecord = mDataSet.createRecord();
+      mRecord.setStringField("truckNumber", mReportedTruck);
+      mDataSet.insertRecord(mRecord);
+    } catch (Exception e) {
+      systemMessage(e.toString());
+    }
+  }
+}
