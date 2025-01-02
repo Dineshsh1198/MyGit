@@ -1,0 +1,1099 @@
+HEADER '';
+FOOTER '';
+set @page_size 500;
+SET @WIDTH 320;
+set @loop 0;
+set @add_time 0;
+set @report 0;
+set @oddrow 1;
+SET @intRow 1;
+set @rowclass 'class="odd-row';
+SET @CAT 0;
+SELECT SET @CAT item_value FROM item_val WHERE name  = 'REPORT_ITEMS.CATEGORY';
+
+IF @p0 = '' THEN
+	SET @start_time NUMBER('2-JAN-72 00:00:00');  
+ELSE
+	SET @start_time TO_LCT(NUMBER(@p0));
+ENDIF;
+
+IF @p1 = '' THEN
+	SET @end_time @TIME; 
+ELSE
+	SET @end_time TO_LCT(NUMBER(@p1));
+ENDIF; 
+
+IF @CAT = 3 THEN
+  
+SELECT '<HTML>';
+SELECT '  <LINK HREF="static/DefaultStyles.css" REL="stylesheet" TYPE="text/css">';
+SELECT '  <LINK HREF="static/ReportStyles.css" REL="stylesheet" TYPE="text/css">';
+SELECT '  <LINK HREF="static/EqualizationReportStyles.css" REL="stylesheet" TYPE="text/css">';
+SELECT '    <HEAD>';
+SELECT '     <TABLE>';
+SELECT '       <TR>';
+SELECT '         <TD width="30%" text-allign:left><IMG SRC="static/BPCL.png" width="60" heighrt="60"></TD>';
+SELECT '         <TD width="40%"><H3><b>IOCL LPG BOTTLING PLANT AUTOMATION SYSTEM-BANKA<br>REPORTS OF GMS</b></H3></TD>';
+SELECT '         <TD width="30%" text-allign:right><IMG SRC="static/Yokogawa.png" width="60" heighrt="60"></TD>';
+SELECT '       </TR>';
+SELECT '     </TABLE>';
+SELECT '     <TABLE>';
+SELECT '     <TR>';
+SELECT '       <TD class="desc" colspan="3">Report Period:',char(@start_time,'DD/MM/YYYY hh:mm:ss'),' to ' ,char(@end_time,'DD/MM/YYYY hh:mm:ss');
+    SELECT '         <TD width="40%" text-allign:right><b>Note:Blank Value In Peak&Average Column Means zero Value</b></TD>';
+SELECT '     <TR>';
+SELECT '       <TD class="desc" colspan="3">Report Date    :',char(@date,'DD/MM/YYYY hh:mm:ss');
+SELECT '       </TR>';
+SELECT '     </TABLE>';
+SELECT '     </HEAD>';
+SELECT '     <BODY>';
+SELECT '     <TABLE>';
+SELECT '     <THead>';
+SELECT '     <TR>';
+SELECT '        <TH rowspan="2">','TAG</TH>';
+SELECT '        <TH rowspan="2">','LOCATION</TH>';
+SELECT '        <TH rowspan="2">','WARN COUNT</TH>';
+SELECT '        <TH rowspan="2">','ALARM COUNT</TH>';
+SELECT '        <TH rowspan="2">','PEAK VALUE</TH>';
+SELECT '        <TH rowspan="2">','AVG VALUE</TH>';
+SELECT '        <TH rowspan="2">','FAULT COUNT</TH>';
+   SELECT '        <TH  rowspan="2" >','COMMENTS</TH>' ;
+ 
+  
+SELECT '     </TR>';
+SELECT '     </THead>';
+SELECT '     </Tbody>';
+SELECT '       <TR>';
+    SELECT '     <TR>';
+   SELECT '      <TD class="data">','HCD-01</TD>';
+   SELECT '      <TD class="data">','LPG PUMP-1</TD>';
+
+  SET @HCD_01_HH 0;
+
+  SELECT SET @HCD_01_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1101_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_01_HH);
+  SET @HCD_01_H 0;
+  SELECT SET @HCD_01_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1101_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_01_H);
+SET @HCD_01_PK 0;
+  SELECT SET@HCD_01_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1101_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_01_PK,'9999.99');
+SET @HCD_01_AVG 0;
+ SELECT SET@HCD_01_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1101_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_01_AVG,'9999.99');
+  SET @HCD_01_STS 0;
+SELECT SET @HCD_01_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1101_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_01_STS);
+   SELECT '     <TR>';
+     SELECT '      <TD class="data">','HCD-02</TD>';
+   SELECT '      <TD class="data">','LPG RECEIPT HEADER</TD>';
+  
+
+ SET @HCD_02_HH 0;
+
+  SELECT SET @HCD_02_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1102_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_02_HH);
+  SET @HCD_02_H 0;
+  SELECT SET @HCD_02_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1102_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_02_H);
+SET @HCD_02_PK 0;
+  SELECT SET@HCD_02_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1102_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_02_PK,'9999.99');
+SET @HCD_02_AVG 0;
+ SELECT SET@HCD_02_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1102_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_02_AVG,'9999.99');
+  SET @HCD_02_STS 0;
+SELECT SET @HCD_02_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1102_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_02_STS);
+  SELECT '     <TR>';
+      SELECT '      <TD class="data">','HCD-03</TD>';
+   SELECT '      <TD class="data">','DOME-1 MB-1</TD>';
+  
+
+ SET @HCD_03_HH 0;
+
+  SELECT SET @HCD_03_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1103_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_03_HH);
+  SET @HCD_03_H 0;
+  SELECT SET @HCD_03_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1103_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_03_H);
+SET @HCD_03_PK 0;
+  SELECT SET@HCD_03_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1103_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_03_PK,'9999.99');
+SET @HCD_03_AVG 0;
+ SELECT SET@HCD_03_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1103_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_03_AVG,'9999.99');
+  SET @HCD_03_STS 0;
+SELECT SET @HCD_03_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1103_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_03_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-04</TD>';
+   SELECT '      <TD class="data">','DOME-2 MB1</TD>';
+  
+
+ SET @HCD_04_HH 0;
+
+  SELECT SET @HCD_04_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1104_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_04_HH);
+  SET @HCD_04_H 0;
+  SELECT SET @HCD_04_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1104_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_04_H);
+SET @HCD_04_PK 0;
+  SELECT SET@HCD_04_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1104_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_04_PK,'9999.99');
+SET @HCD_04_AVG 0;
+ SELECT SET@HCD_04_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1104_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_04_AVG,'9999.99');
+  SET @HCD_04_STS 0;
+SELECT SET @HCD_04_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1104_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_04_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-05</TD>';
+   SELECT '      <TD class="data">','INSPECTION TUNNEL OF LPG BULLET MB1</TD>';
+  
+
+ SET @HCD_05_HH 0;
+
+  SELECT SET @HCD_05_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1105_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_05_HH);
+  SET @HCD_05_H 0;
+  SELECT SET @HCD_05_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1105_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_05_H);
+SET @HCD_05_PK 0;
+  SELECT SET@HCD_05_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1105_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_05_PK,'9999.99');
+SET @HCD_05_AVG 0;
+ SELECT SET@HCD_05_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1105_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_05_AVG,'9999.99');
+  SET @HCD_05_STS 0;
+SELECT SET @HCD_05_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1105_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_05_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-06</TD>';
+   SELECT '      <TD class="data">','LIQUID BODY ROV MB1</TD>';
+  
+
+ SET @HCD_06_HH 0;
+
+  SELECT SET @HCD_06_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1106_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_06_HH);
+  SET @HCD_06_H 0;
+  SELECT SET @HCD_06_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1106_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_06_H);
+SET @HCD_06_PK 0;
+  SELECT SET@HCD_06_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1106_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_06_PK,'9999.99');
+SET @HCD_06_AVG 0;
+ SELECT SET@HCD_06_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1106_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_06_AVG,'9999.99');
+  SET @HCD_06_STS 0;
+SELECT SET @HCD_06_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1106_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_06_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-07</TD>';
+   SELECT '      <TD class="data">','VAPOUR COMPRESSOR-1</TD>';
+  
+
+ SET @HCD_07_HH 0;
+
+  SELECT SET @HCD_07_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1107_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_07_HH);
+  SET @HCD_07_H 0;
+  SELECT SET @HCD_07_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1107_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_07_H);
+SET @HCD_07_PK 0;
+  SELECT SET@HCD_07_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1107_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_07_PK,'9999.99');
+SET @HCD_07_AVG 0;
+ SELECT SET@HCD_07_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1107_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_07_AVG,'9999.99');
+  SET @HCD_07_STS 0;
+SELECT SET @HCD_07_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1107_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_07_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-08</TD>';
+   SELECT '      <TD class="data">','DOME-1 MB2</TD>';
+  
+
+ SET @HCD_08_HH 0;
+
+  SELECT SET @HCD_08_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1108_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_08_HH);
+  SET @HCD_08_H 0;
+  SELECT SET @HCD_08_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1108_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_08_H);
+SET @HCD_08_PK 0;
+  SELECT SET@HCD_08_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1108_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_08_PK,'9999.99');
+SET @HCD_08_AVG 0;
+ SELECT SET@HCD_08_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1108_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_08_AVG,'9999.99');
+  SET @HCD_08_STS 0;
+SELECT SET @HCD_08_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1108_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_08_STS);
+  SELECT '     <TR>';
+         SELECT '      <TD class="data">','HCD-09</TD>';
+   SELECT '      <TD class="data">','DOME-2 MB2</TD>';
+  
+
+ SET @HCD_09_HH 0;
+
+  SELECT SET @HCD_09_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1109_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_09_HH);
+  SET @HCD_09_H 0;
+  SELECT SET @HCD_09_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1109_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_09_H);
+SET @HCD_09_PK 0;
+  SELECT SET@HCD_09_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1109_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_09_PK,'9999.99');
+SET @HCD_09_AVG 0;
+ SELECT SET@HCD_09_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1109_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_09_AVG,'9999.99');
+  SET @HCD_09_STS 0;
+SELECT SET @HCD_09_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1109_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_09_STS);
+  SELECT '     <TR>';
+        SELECT '      <TD class="data">','HCD-10</TD>';
+   SELECT '      <TD class="data">','INSPECTION TUNNEL OF LPG BULLET MB2</TD>';
+  
+
+ SET @HCD_10_HH 0;
+
+  SELECT SET @HCD_10_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1110_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_10_HH);
+  SET @HCD_10_H 0;
+  SELECT SET @HCD_10_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1110_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_10_H);
+SET @HCD_10_PK 0;
+  SELECT SET@HCD_10_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1110_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_10_PK,'9999.99');
+SET @HCD_10_AVG 0;
+ SELECT SET@HCD_10_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1110_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_10_AVG,'9999.99');
+  SET @HCD_10_STS 0;
+SELECT SET @HCD_10_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1110_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_10_STS);
+  SELECT '     <TR>';
+    SELECT '      <TD class="data">','HCD-11</TD>';
+   SELECT '      <TD class="data">','LIQUID BODY ROV MB2</TD>';
+
+  SET @HCD_11_HH 0;
+
+  SELECT SET @HCD_11_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1111_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_11_HH);
+  SET @HCD_11_H 0;
+  SELECT SET @HCD_11_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1111_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_11_H);
+SET @HCD_11_PK 0;
+  SELECT SET@HCD_11_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1111_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_11_PK,'9999.99');
+SET @HCD_11_AVG 0;
+ SELECT SET@HCD_11_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1111_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_11_AVG,'9999.99');
+  SET @HCD_11_STS 0;
+SELECT SET @HCD_11_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1111_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_11_STS);
+   SELECT '     <TR>';
+     SELECT '      <TD class="data">','HCD-12</TD>';
+   SELECT '      <TD class="data">','VAPOUR COMPRESSOR-2</TD>';
+  
+
+ SET @HCD_12_HH 0;
+
+  SELECT SET @HCD_12_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1112_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_12_HH);
+  SET @HCD_12_H 0;
+  SELECT SET @HCD_12_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1112_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_12_H);
+SET @HCD_12_PK 0;
+  SELECT SET@HCD_12_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1112_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_12_PK,'9999.99');
+SET @HCD_12_AVG 0;
+ SELECT SET@HCD_12_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1112_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_12_AVG,'9999.99');
+  SET @HCD_12_STS 0;
+SELECT SET @HCD_12_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1112_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_12_STS);
+  SELECT '     <TR>';
+      SELECT '      <TD class="data">','HCD-13</TD>';
+   SELECT '      <TD class="data">','DOME-1 MB3</TD>';
+  
+
+ SET @HCD_13_HH 0;
+
+  SELECT SET @HCD_13_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1113_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_13_HH);
+  SET @HCD_13_H 0;
+  SELECT SET @HCD_13_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1113_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_13_H);
+SET @HCD_13_PK 0;
+  SELECT SET@HCD_13_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1113_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_13_PK,'9999.99');
+SET @HCD_13_AVG 0;
+ SELECT SET@HCD_13_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1113_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_13_AVG,'9999.99');
+  SET @HCD_13_STS 0;
+SELECT SET @HCD_13_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1113_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_13_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-14</TD>';
+   SELECT '      <TD class="data">','DOME-2 MB3</TD>';
+  
+
+ SET @HCD_14_HH 0;
+
+  SELECT SET @HCD_14_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1114_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_14_HH);
+  SET @HCD_14_H 0;
+  SELECT SET @HCD_14_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1114_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_14_H);
+SET @HCD_14_PK 0;
+  SELECT SET@HCD_14_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1114_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_14_PK,'9999.99');
+SET @HCD_14_AVG 0;
+ SELECT SET@HCD_14_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1114_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_14_AVG,'9999.99');
+  SET @HCD_14_STS 0;
+SELECT SET @HCD_14_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1114_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_14_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-15</TD>';
+   SELECT '      <TD class="data">','INSPECTION TUNNEL OF LPG BULLET MB3</TD>';
+  
+
+ SET @HCD_15_HH 0;
+
+  SELECT SET @HCD_15_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1115_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_15_HH);
+  SET @HCD_15_H 0;
+  SELECT SET @HCD_15_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1115_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_15_H);
+SET @HCD_15_PK 0;
+  SELECT SET@HCD_15_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1115_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_15_PK,'9999.99');
+SET @HCD_15_AVG 0;
+ SELECT SET@HCD_15_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1115_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_15_AVG,'9999.99');
+  SET @HCD_15_STS 0;
+SELECT SET @HCD_15_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1115_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_15_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-16</TD>';
+   SELECT '      <TD class="data">','LIQUID BODY ROV MB3</TD>';
+  
+
+ SET @HCD_16_HH 0;
+
+  SELECT SET @HCD_16_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1116_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_16_HH);
+  SET @HCD_16_H 0;
+  SELECT SET @HCD_16_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1116_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_16_H);
+SET @HCD_16_PK 0;
+  SELECT SET@HCD_16_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1116_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_16_PK,'9999.99');
+SET @HCD_16_AVG 0;
+ SELECT SET@HCD_16_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1116_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_16_AVG,'9999.99');
+  SET @HCD_16_STS 0;
+SELECT SET @HCD_16_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1116_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_16_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-17</TD>';
+   SELECT '      <TD class="data">','VAPOUR COMPRESSOR-3</TD>';
+  
+
+ SET @HCD_17_HH 0;
+
+  SELECT SET @HCD_17_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1117_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_17_HH);
+  SET @HCD_17_H 0;
+  SELECT SET @HCD_17_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1117_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_17_H);
+SET @HCD_17_PK 0;
+  SELECT SET@HCD_17_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1117_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_17_PK,'9999.99');
+SET @HCD_17_AVG 0;
+ SELECT SET@HCD_17_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1117_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_17_AVG,'9999.99');
+  SET @HCD_17_STS 0;
+SELECT SET @HCD_17_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1117_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_17_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-18</TD>';
+   SELECT '      <TD class="data">','LPG TRANSFER PUMP-2</TD>';
+  
+
+ SET @HCD_18_HH 0;
+
+  SELECT SET @HCD_18_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1118_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_18_HH);
+  SET @HCD_18_H 0;
+  SELECT SET @HCD_18_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1118_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_18_H);
+SET @HCD_18_PK 0;
+  SELECT SET@HCD_18_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1118_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_18_PK,'9999.99');
+SET @HCD_18_AVG 0;
+ SELECT SET@HCD_18_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1118_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_18_AVG,'9999.99');
+  SET @HCD_18_STS 0;
+SELECT SET @HCD_18_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1118_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_18_STS);
+  SELECT '     <TR>';
+         SELECT '      <TD class="data">','HCD-19</TD>';
+   SELECT '      <TD class="data">','NEAR WEIGHT CORRECTION UNIT-1</TD>';
+  
+
+ SET @HCD_19_HH 0;
+
+  SELECT SET @HCD_19_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1119_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_19_HH);
+  SET @HCD_19_H 0;
+  SELECT SET @HCD_19_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1119_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_19_H);
+SET @HCD_19_PK 0;
+  SELECT SET@HCD_19_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1119_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_19_PK,'9999.99');
+SET @HCD_19_AVG 0;
+ SELECT SET@HCD_19_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1119_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_19_AVG,'9999.99');
+  SET @HCD_19_STS 0;
+SELECT SET @HCD_19_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1119_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_19_STS);
+  SELECT '     <TR>';
+          SELECT '      <TD class="data">','HCD-20</TD>';
+   SELECT '      <TD class="data">','WEIGHT CORRECTION UNIT-2</TD>';
+  
+
+ SET @HCD_20_HH 0;
+
+  SELECT SET @HCD_20_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1120_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_20_HH);
+  SET @HCD_20_H 0;
+  SELECT SET @HCD_20_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1120_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_20_H);
+SET @HCD_20_PK 0;
+  SELECT SET@HCD_20_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1120_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_20_PK,'9999.99');
+SET @HCD_20_AVG 0;
+ SELECT SET@HCD_20_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1120_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_20_AVG,'9999.99');
+  SET @HCD_20_STS 0;
+SELECT SET @HCD_20_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1120_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_20_STS);
+  SELECT '     <TR>';
+    SELECT '      <TD class="data">','HCD-21</TD>';
+   SELECT '      <TD class="data">','VALVE CHANGE-1</TD>';
+
+  SET @HCD_21_HH 0;
+
+  SELECT SET @HCD_21_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1121_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_21_HH);
+  SET @HCD_21_H 0;
+  SELECT SET @HCD_21_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1121_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_21_H);
+SET @HCD_21_PK 0;
+  SELECT SET@HCD_21_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1121_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_21_PK,'9999.99');
+SET @HCD_21_AVG 0;
+ SELECT SET@HCD_21_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1121_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_21_AVG,'9999.99');
+  SET @HCD_21_STS 0;
+SELECT SET @HCD_21_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1121_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_21_STS);
+   SELECT '     <TR>';
+     SELECT '      <TD class="data">','HCD-22</TD>';
+   SELECT '      <TD class="data">','VALVE CHANGE-2</TD>';
+  
+
+ SET @HCD_22_HH 0;
+
+  SELECT SET @HCD_22_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1122_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_22_HH);
+  SET @HCD_22_H 0;
+  SELECT SET @HCD_22_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1122_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_22_H);
+SET @HCD_22_PK 0;
+  SELECT SET@HCD_22_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1122_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_22_PK,'9999.99');
+SET @HCD_22_AVG 0;
+ SELECT SET@HCD_22_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1122_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_22_AVG,'9999.99');
+  SET @HCD_22_STS 0;
+SELECT SET @HCD_22_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1122_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_22_STS);
+  SELECT '     <TR>';
+      SELECT '      <TD class="data">','HCD-23</TD>';
+   SELECT '      <TD class="data">','EVACUATION TANK</TD>';
+  
+
+ SET @HCD_23_HH 0;
+
+  SELECT SET @HCD_23_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1124_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_23_HH);
+  SET @HCD_23_H 0;
+  SELECT SET @HCD_23_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1123_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_23_H);
+SET @HCD_23_PK 0;
+  SELECT SET@HCD_23_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1123_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_23_PK,'9999.99');
+SET @HCD_23_AVG 0;
+ SELECT SET@HCD_23_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1123_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_23_AVG,'9999.99');
+  SET @HCD_23_STS 0;
+SELECT SET @HCD_23_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1123_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_23_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-24</TD>';
+   SELECT '      <TD class="data">','LPG DRAIN</TD>';
+  
+
+ SET @HCD_24_HH 0;
+
+  SELECT SET @HCD_24_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1124_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_24_HH);
+  SET @HCD_24_H 0;
+  SELECT SET @HCD_24_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1124_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_24_H);
+SET @HCD_24_PK 0;
+  SELECT SET@HCD_24_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1124_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_24_PK,'9999.99');
+SET @HCD_24_AVG 0;
+ SELECT SET@HCD_24_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1124_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_24_AVG,'9999.99');
+  SET @HCD_24_STS 0;
+SELECT SET @HCD_24_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1124_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_24_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-25</TD>';
+   SELECT '      <TD class="data">','SPARE</TD>';
+  
+
+ SET @HCD_25_HH 0;
+
+  SELECT SET @HCD_25_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1125_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_25_HH);
+  SET @HCD_25_H 0;
+  SELECT SET @HCD_25_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1125_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_25_H);
+SET @HCD_25_PK 0;
+  SELECT SET@HCD_25_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1125_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_25_PK,'9999.99');
+SET @HCD_25_AVG 0;
+ SELECT SET@HCD_25_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1125_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_25_AVG,'9999.99');
+  SET @HCD_25_STS 0;
+SELECT SET @HCD_25_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1125_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_25_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-26</TD>';
+   SELECT '      <TD class="data">','SPARE</TD>';
+  
+
+ SET @HCD_26_HH 0;
+
+  SELECT SET @HCD_26_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1126_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_26_HH);
+  SET @HCD_26_H 0;
+  SELECT SET @HCD_26_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1126_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_26_H);
+SET @HCD_26_PK 0;
+  SELECT SET@HCD_26_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1126_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_26_PK,'9999.99');
+SET @HCD_26_AVG 0;
+ SELECT SET@HCD_26_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1126_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_26_AVG,'9999.99');
+  SET @HCD_26_STS 0;
+SELECT SET @HCD_26_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1126_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_26_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-27</TD>';
+   SELECT '      <TD class="data">','FILLED CYLINDER SHED</TD>';
+  
+
+ SET @HCD_27_HH 0;
+
+  SELECT SET @HCD_27_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1127_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_27_HH);
+  SET @HCD_27_H 0;
+  SELECT SET @HCD_27_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1127_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_27_H);
+SET @HCD_27_PK 0;
+  SELECT SET@HCD_27_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1127_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_27_PK,'9999.99');
+SET @HCD_27_AVG 0;
+ SELECT SET@HCD_27_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1127_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_27_AVG,'9999.99');
+  SET @HCD_27_STS 0;
+SELECT SET @HCD_27_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1127_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_27_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-28</TD>';
+   SELECT '      <TD class="data">','FILLED CYLINDER SHED</TD>';
+  
+
+ SET @HCD_28_HH 0;
+
+  SELECT SET @HCD_28_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1128_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_28_HH);
+  SET @HCD_28_H 0;
+  SELECT SET @HCD_28_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1128_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_28_H);
+SET @HCD_28_PK 0;
+  SELECT SET@HCD_28_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1128_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_28_PK,'9999.99');
+SET @HCD_28_AVG 0;
+ SELECT SET@HCD_28_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1128_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_28_AVG,'9999.99');
+  SET @HCD_28_STS 0;
+SELECT SET @HCD_28_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1128_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_28_STS);
+  SELECT '     <TR>';
+         SELECT '      <TD class="data">','HCD-29</TD>';
+   SELECT '      <TD class="data">','47.5 KG FILLING SHED</TD>';
+  
+
+ SET @HCD_29_HH 0;
+
+  SELECT SET @HCD_29_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1129_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_29_HH);
+  SET @HCD_29_H 0;
+  SELECT SET @HCD_29_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1129_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_29_H);
+SET @HCD_29_PK 0;
+  SELECT SET@HCD_29_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1129_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_29_PK,'9999.99');
+SET @HCD_29_AVG 0;
+ SELECT SET@HCD_29_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1129_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_29_AVG,'9999.99');
+  SET @HCD_29_STS 0;
+SELECT SET @HCD_29_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1129_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_29_STS);
+  SELECT '     <TR>';
+          SELECT '      <TD class="data">','HCD-30</TD>';
+   SELECT '      <TD class="data">','47.5 FILLING SHED</TD>';
+  
+
+ SET @HCD_30_HH 0;
+
+  SELECT SET @HCD_30_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1130_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_30_HH);
+  SET @HCD_30_H 0;
+  SELECT SET @HCD_30_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1130_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_30_H);
+SET @HCD_30_PK 0;
+  SELECT SET@HCD_30_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1130_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_30_PK,'9999.99');
+SET @HCD_30_AVG 0;
+ SELECT SET@HCD_30_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1130_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_30_AVG,'9999.99');
+  SET @HCD_30_STS 0;
+SELECT SET @HCD_30_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1130_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_30_STS);
+  SELECT '     <TR>';
+    SELECT '      <TD class="data">','HCD-31</TD>';
+   SELECT '      <TD class="data">','DEGASSING SHED</TD>';
+
+  SET @HCD_31_HH 0;
+
+  SELECT SET @HCD_31_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1131_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_31_HH);
+  SET @HCD_31_H 0;
+  SELECT SET @HCD_31_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1131_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_31_H);
+SET @HCD_31_PK 0;
+  SELECT SET@HCD_31_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1131_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_31_PK,'9999.99');
+SET @HCD_31_AVG 0;
+ SELECT SET@HCD_31_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1131_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_31_AVG,'9999.99');
+  SET @HCD_31_STS 0;
+SELECT SET @HCD_31_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1131_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_31_STS);
+   SELECT '     <TR>';
+     SELECT '      <TD class="data">','HCD-32</TD>';
+   SELECT '      <TD class="data">','EVACUATION TANK-2</TD>';
+  
+
+ SET @HCD_32_HH 0;
+
+  SELECT SET @HCD_32_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1132_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_32_HH);
+  SET @HCD_32_H 0;
+  SELECT SET @HCD_32_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1132_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_32_H);
+SET @HCD_32_PK 0;
+  SELECT SET@HCD_32_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1132_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_32_PK,'9999.99');
+SET @HCD_32_AVG 0;
+ SELECT SET@HCD_32_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1132_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_32_AVG,'9999.99');
+  SET @HCD_32_STS 0;
+SELECT SET @HCD_32_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1132_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_32_STS);
+  SELECT '     <TR>';
+      SELECT '      <TD class="data">','HCD-33</TD>';
+   SELECT '      <TD class="data">','5 KG FILLING SHED</TD>';
+  
+
+ SET @HCD_33_HH 0;
+
+  SELECT SET @HCD_33_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1133_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_33_HH);
+  SET @HCD_33_H 0;
+  SELECT SET @HCD_33_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1133_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_33_H);
+SET @HCD_33_PK 0;
+  SELECT SET@HCD_33_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1133_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_33_PK,'9999.99');
+SET @HCD_33_AVG 0;
+ SELECT SET@HCD_33_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1133_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_33_AVG,'9999.99');
+  SET @HCD_33_STS 0;
+SELECT SET @HCD_33_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1133_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_33_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-34</TD>';
+   SELECT '      <TD class="data">','BAY-1</TD>';
+  
+
+ SET @HCD_34_HH 0;
+
+  SELECT SET @HCD_34_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1201_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_34_HH);
+  SET @HCD_34_H 0;
+  SELECT SET @HCD_34_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1201_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_34_H);
+SET @HCD_34_PK 0;
+  SELECT SET@HCD_34_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1201_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_34_PK,'9999.99');
+SET @HCD_34_AVG 0;
+ SELECT SET@HCD_34_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1201_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_34_AVG,'9999.99');
+  SET @HCD_34_STS 0;
+SELECT SET @HCD_34_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1201_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_34_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-35</TD>';
+   SELECT '      <TD class="data">','BAY-2</TD>';
+  
+
+ SET @HCD_35_HH 0;
+
+  SELECT SET @HCD_35_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1202_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_35_HH);
+  SET @HCD_35_H 0;
+  SELECT SET @HCD_35_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1202_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_35_H);
+SET @HCD_35_PK 0;
+  SELECT SET@HCD_35_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1202_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_35_PK,'9999.99');
+SET @HCD_35_AVG 0;
+ SELECT SET@HCD_35_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1202_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_35_AVG,'9999.99');
+  SET @HCD_35_STS 0;
+SELECT SET @HCD_35_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1202_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_35_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-36</TD>';
+   SELECT '      <TD class="data">','BAY-3</TD>';
+  
+
+ SET @HCD_36_HH 0;
+
+  SELECT SET @HCD_36_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1203_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_36_HH);
+  SET @HCD_36_H 0;
+  SELECT SET @HCD_36_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1203_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_36_H);
+SET @HCD_36_PK 0;
+  SELECT SET@HCD_36_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1203_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_36_PK,'9999.99');
+SET @HCD_36_AVG 0;
+ SELECT SET@HCD_36_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1203_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_36_AVG,'9999.99');
+  SET @HCD_36_STS 0;
+SELECT SET @HCD_36_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1203_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_36_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-37</TD>';
+   SELECT '      <TD class="data">','BAY-4</TD>';
+  
+
+ SET @HCD_37_HH 0;
+
+  SELECT SET @HCD_37_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1204_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_37_HH);
+  SET @HCD_37_H 0;
+  SELECT SET @HCD_37_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1204_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_37_H);
+SET @HCD_37_PK 0;
+  SELECT SET@HCD_37_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1204_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_37_PK,'9999.99');
+SET @HCD_37_AVG 0;
+ SELECT SET@HCD_37_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1204_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_37_AVG,'9999.99');
+  SET @HCD_37_STS 0;
+SELECT SET @HCD_37_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1204_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_37_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-38</TD>';
+   SELECT '      <TD class="data">','BAY-5</TD>';
+  
+
+ SET @HCD_38_HH 0;
+
+  SELECT SET @HCD_38_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1205_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_38_HH);
+  SET @HCD_38_H 0;
+  SELECT SET @HCD_38_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1205_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_38_H);
+SET @HCD_38_PK 0;
+  SELECT SET@HCD_38_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1205_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_38_PK,'9999.99');
+SET @HCD_38_AVG 0;
+ SELECT SET@HCD_38_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1205_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_38_AVG,'9999.99');
+  SET @HCD_38_STS 0;
+SELECT SET @HCD_38_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1205_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_38_STS);
+  SELECT '     <TR>';
+         SELECT '      <TD class="data">','HCD-39</TD>';
+   SELECT '      <TD class="data">','BAY-6</TD>';
+  
+
+ SET @HCD_39_HH 0;
+
+  SELECT SET @HCD_39_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1206_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_39_HH);
+  SET @HCD_39_H 0;
+  SELECT SET @HCD_39_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1206_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_39_H);
+SET @HCD_39_PK 0;
+  SELECT SET@HCD_39_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1206_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_39_PK,'9999.99');
+SET @HCD_39_AVG 0;
+ SELECT SET@HCD_39_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1206_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_39_AVG,'9999.99');
+  SET @HCD_39_STS 0;
+SELECT SET @HCD_39_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1206_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_39_STS);
+  SELECT '     <TR>';
+          SELECT '      <TD class="data">','HCD-40</TD>';
+   SELECT '      <TD class="data">','BAY-7</TD>';
+  
+
+ SET @HCD_40_HH 0;
+
+  SELECT SET @HCD_40_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1207_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_40_HH);
+  SET @HCD_40_H 0;
+  SELECT SET @HCD_40_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1207_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_40_H);
+SET @HCD_40_PK 0;
+  SELECT SET@HCD_40_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1207_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_40_PK,'9999.99');
+SET @HCD_40_AVG 0;
+ SELECT SET@HCD_40_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1207_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_40_AVG,'9999.99');
+  SET @HCD_40_STS 0;
+SELECT SET @HCD_40_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1207_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_40_STS);
+  SELECT '     <TR>';
+    SELECT '      <TD class="data">','HCD-41</TD>';
+   SELECT '      <TD class="data">','BAY-8</TD>';
+
+  SET @HCD_41_HH 0;
+
+  SELECT SET @HCD_41_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1208_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_41_HH);
+  SET @HCD_41_H 0;
+  SELECT SET @HCD_41_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1208_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_41_H);
+SET @HCD_41_PK 0;
+  SELECT SET@HCD_41_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1208_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_41_PK,'9999.99');
+SET @HCD_41_AVG 0;
+ SELECT SET@HCD_41_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1208_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_41_AVG,'9999.99');
+  SET @HCD_41_STS 0;
+SELECT SET @HCD_41_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1208_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_41_STS);
+   SELECT '     <TR>';
+     SELECT '      <TD class="data">','HCD-42</TD>';
+   SELECT '      <TD class="data">','NEAR TLD</TD>';
+  
+
+ SET @HCD_42_HH 0;
+
+  SELECT SET @HCD_42_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1209_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_42_HH);
+  SET @HCD_42_H 0;
+  SELECT SET @HCD_42_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1209_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_42_H);
+SET @HCD_42_PK 0;
+  SELECT SET@HCD_42_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1209_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_42_PK,'9999.99');
+SET @HCD_42_AVG 0;
+ SELECT SET@HCD_42_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1209_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_42_AVG,'9999.99');
+  SET @HCD_42_STS 0;
+SELECT SET @HCD_42_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1209_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_42_STS);
+  SELECT '     <TR>';
+      SELECT '      <TD class="data">','HCD-43</TD>';
+   SELECT '      <TD class="data">','NEAR I/L LINE OF CAROUSEL-1</TD>';
+  
+
+ SET @HCD_43_HH 0;
+
+  SELECT SET @HCD_43_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1301_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_43_HH);
+  SET @HCD_43_H 0;
+  SELECT SET @HCD_43_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1301_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_43_H);
+SET @HCD_43_PK 0;
+  SELECT SET@HCD_43_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1301_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_43_PK,'9999.99');
+SET @HCD_43_AVG 0;
+ SELECT SET@HCD_43_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1301_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_43_AVG,'9999.99');
+  SET @HCD_43_STS 0;
+SELECT SET @HCD_43_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1301_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_43_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-44</TD>';
+   SELECT '      <TD class="data">','NEAR O/L LINE OF CAROUSEL-1</TD>';
+  
+
+ SET @HCD_44_HH 0;
+
+  SELECT SET @HCD_44_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1302_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_44_HH);
+  SET @HCD_44_H 0;
+  SELECT SET @HCD_44_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1302_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_44_H);
+SET @HCD_44_PK 0;
+  SELECT SET@HCD_44_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1302_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_44_PK,'9999.99');
+SET @HCD_44_AVG 0;
+ SELECT SET@HCD_44_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1302_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_44_AVG,'9999.99');
+  SET @HCD_44_STS 0;
+SELECT SET @HCD_44_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1302_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_44_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-45</TD>';
+   SELECT '      <TD class="data">','NEAR I/L LINE OF CAROUSEL-2</TD>';
+  
+
+ SET @HCD_45_HH 0;
+
+  SELECT SET @HCD_45_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1303_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_45_HH);
+  SET @HCD_45_H 0;
+  SELECT SET @HCD_45_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1303_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_45_H);
+SET @HCD_45_PK 0;
+  SELECT SET@HCD_45_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1303_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_45_PK,'9999.99');
+SET @HCD_45_AVG 0;
+ SELECT SET@HCD_45_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1303_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_45_AVG,'9999.99');
+  SET @HCD_45_STS 0;
+SELECT SET @HCD_45_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1303_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_45_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-46</TD>';
+   SELECT '      <TD class="data">','NEAR O/L LINE OF CAROUSEL-2</TD>';
+  
+
+ SET @HCD_46_HH 0;
+
+  SELECT SET @HCD_46_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1305_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_46_HH);
+  SET @HCD_46_H 0;
+  SELECT SET @HCD_46_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1305_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_46_H);
+SET @HCD_46_PK 0;
+  SELECT SET@HCD_46_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1305_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_46_PK,'9999.99');
+SET @HCD_46_AVG 0;
+ SELECT SET@HCD_46_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1305_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_46_AVG,'9999.99');
+  SET @HCD_46_STS 0;
+SELECT SET @HCD_46_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1305_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_46_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-47</TD>';
+   SELECT '      <TD class="data">','NEAR PURGING UNIT-1</TD>';
+  
+
+ SET @HCD_47_HH 0;
+
+  SELECT SET @HCD_47_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1306_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_47_HH);
+  SET @HCD_47_H 0;
+  SELECT SET @HCD_47_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1306_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_47_H);
+SET @HCD_47_PK 0;
+  SELECT SET@HCD_47_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1306_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_47_PK,'9999.99');
+SET @HCD_47_AVG 0;
+ SELECT SET@HCD_47_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1306_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_47_AVG,'9999.99');
+  SET @HCD_47_STS 0;
+SELECT SET @HCD_47_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1306_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_47_STS);
+  SELECT '     <TR>';
+       SELECT '      <TD class="data">','HCD-48</TD>';
+   SELECT '      <TD class="data">','NEAR PURGING UNIT-2</TD>';
+  
+
+ SET @HCD_48_HH 0;
+
+  SELECT SET @HCD_48_HH   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1307_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=20 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_48_HH);
+  SET @HCD_48_H 0;
+  SELECT SET @HCD_48_H   COUNT( item_value ) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1307_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time AND ITEM_VALUE>=60 AND ITEM_VALUE<=100 ;
+  SELECT '      <TD class="data">',char(@HCD_48_H);
+SET @HCD_48_PK 0;
+  SELECT SET@HCD_48_PK MAX(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1307_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_48_PK,'9999.99');
+SET @HCD_48_AVG 0;
+ SELECT SET@HCD_48_AVG AVG(item_value) FROM item_history WHERE item_name = 'SAFETY_PLC.SCS0111.AE_1307_PV_R' AND sample_time >= @start_time AND sample_time <= @end_time;
+ SELECT '      <TD class="data">',char(@HCD_48_AVG,'9999.99');
+  SET @HCD_48_STS 0;
+SELECT SET @HCD_48_STS COUNT(ALARM_TEXT)  FROM ALARM_CHRONO WHERE  ITEM_NAME LIKE 'SAFETY_PLC.SCS0111.AE_1307_STATUS' AND (ALARM_TIME >= @start_time AND ALARM_TIME <=@end_time) AND ALARM_TEXT LIKE 'Faulty' ;
+SELECT '      <TD class="data">',char(@HCD_48_STS);
+  SELECT '     <TR>';
+        
+  
+
+  IF @intRow = 0 THEN
+    SET @intRow 1;
+  ELSE
+    SET @intRow 0;
+  ENDIF;
+
+  IF @intRow = 0 THEN
+    SET @strClassType 'ReportDataOddRow';
+  ELSE
+    SET @strClassType 'ReportDataEvenRow';
+  ENDIF;
+   SELECT '   </TR>'; 
+  
+  
+  
+ENDIF;
+DECLARE;
+LOOP
+SELECT '        </Tbody>';
+SELECT '     </TABLE>';
+SELECT '     </BODY>';
+SELECT '     <FOOTER>';
+SELECT '         <HR style="width:100%",allign:center>';
+SELECT '     </FOOTER>';
+  SELECT '     </HTML>';
+
