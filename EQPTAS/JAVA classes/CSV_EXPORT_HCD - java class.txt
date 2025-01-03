@@ -1,0 +1,300 @@
+import com.sun.mail.imap.protocol.Item;
+import fasttools.jopc.exe.signals.SignalControl;
+import fasttools.jtools.dss.api.*;
+import fasttools.processfast.Attribute;
+import fasttools.processfast.ProcessClass;
+import fasttools.processfast.Signal;
+import fasttools.processfast.TriggerGroup;
+
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * PROCESS/FAST Class Template.
+ */
+public class CSV_EXPORT_HCD extends ProcessClass {
+  DateTimeFormatter cDateTimeFormatter = DateTimeFormatter.ofPattern("ddMMyyyy : HH:mm:ss");
+  DateTimeFormatter cDateTimeFileFormatter = DateTimeFormatter.ofPattern("ddMMyyyy");
+  Signal[] sIntCls = defineIntegerSignalArray(Signal.Trigger.VALUE,500);
+  Signal[] sDoubleCls = defineDoubleSignalArray(Signal.Trigger.VALUE,500);
+
+  private Map<String, ArrayList<Object>> cGroupRecordHashMap = new HashMap<>();
+  private Map<String, String> cGroupChannelHashMap = new HashMap<>();
+  private Map<String, ItemStatistic> cGroupColumnItemNameHashMap = new HashMap<>();
+  Attribute aSection = defineStringAttributeForPrompt("Enter File Name: ");
+  int cItemIndex = 0;
+  ArrayList<Object> cColumnList = null;
+  public void create() {
+
+    try {
+      IDataSet mDdCsvDataSet = dssInit.getDataSet("DD_CSV_CONFIG");
+      mDdCsvDataSet.setFilter("FILE_NAME = \"" + aSection.getValueAsString() + "\"");
+      mDdCsvDataSet.rewind();
+      IRecord mItemRecord = mDdCsvDataSet.readNext();
+
+      while (mItemRecord != null) {
+        String mItemName = mItemRecord.getStringField("ITEM_NAME");
+        attachItemToSignal(sDoubleCls[cItemIndex++], mItemName);
+        mItemRecord = mDdCsvDataSet.readNext();
+      }
+
+      mDdCsvDataSet.close();
+    } catch (DssException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public void start(){
+    initialize();
+  }
+
+  public void initialize(){
+    String mLocalDateTime = LocalDateTime.now().format(cDateTimeFileFormatter);
+    try (PrintWriter writer = new PrintWriter(new File("D:\\Doordrishti\\" + aSection.getValueAsString() + "_" + mLocalDateTime + ".csv"))) {
+      StringBuilder sb = new StringBuilder();
+      sb.append("Date : Time");
+      sb.append(',');
+      sb.append("Channel ID");
+      sb.append(',');
+      sb.append("TAG");
+      sb.append(',');
+      try {
+        IDataSet mDdCsvDataSet = dssInit.getDataSet("DD_CSV_CONFIG");
+        mDdCsvDataSet.setFilter("FILE_NAME = \"" + aSection.getValueAsString() + "\"");
+        mDdCsvDataSet.rewind();
+        IRecord mItemRecord = mDdCsvDataSet.readNext();
+        ArrayList<Object> mColumnList = null;
+                cGroupRecordHashMap = new HashMap<>();
+
+        while (mItemRecord != null) {
+          String mGroupName = mItemRecord.getStringField("GROUP_NAME");
+          String mColumnName = mItemRecord.getStringField("COLUMN_NAME");
+          String mItemName = mItemRecord.getStringField("ITEM_NAME");
+          String mFunctionName = mItemRecord.getStringField("FUNCTION_NAME");
+          String mlocationName = mItemRecord.getStringField("LOCATION_NAME");
+          mColumnList = cGroupRecordHashMap.get(mGroupName);
+          
+          if(mColumnList == null){
+            mColumnList = new ArrayList<>();
+            cGroupRecordHashMap.put(mGroupName, mColumnList);
+          }
+          
+          cGroupChannelHashMap.put(mGroupName, mlocationName);
+          mColumnList.add(mColumnName);;
+          ItemStatistic mItemStats = new ItemStatistic();
+          mItemStats.cFunctionName = mFunctionName;
+          mItemStats.cTagName = mItemName;
+
+          for(int i = 0; i < sDoubleCls.length; i++){
+            if(sDoubleCls[i].getName().equals(mItemName)){
+              mItemStats.cSignalControl = sDoubleCls[i];
+              break;
+            }
+          }
+
+          cGroupColumnItemNameHashMap.put(mGroupName + ":" + mColumnName, mItemStats);
+          mItemStats.resetValue();
+          mItemRecord = mDdCsvDataSet.readNext();
+        }
+
+        cColumnList = mColumnList;
+        for(int i = 0; i < mColumnList.size(); i++){
+          sb.append(mColumnList.get(i));
+          sb.append(',');
+        }
+
+        mDdCsvDataSet.close();
+      } catch (DssException e) {
+        e.printStackTrace();
+      }
+      sb.append('\n');
+      writer.write(sb.toString());
+      writer.close();
+    } catch (FileNotFoundException e) {
+      systemMessage(e.getMessage());
+    }
+  }
+
+  public void signalEvent(Signal signal) {
+    for(Map.Entry<String, ItemStatistic> entry :  cGroupColumnItemNameHashMap.entrySet()){
+      ItemStatistic mItemStatistic = entry.getValue();
+      if(mItemStatistic.cTagName.equals(signal.getName())){
+        mItemStatistic.updateFunctionValue(signal);
+      }
+    }
+  }
+
+  public void triggerGroupEvent(TriggerGroup triggerGroup) {
+    String mLocalDateTime = LocalDateTime.now().format(cDateTimeFileFormatter);
+
+    switch(triggerGroup.getName()){
+      case "ONE_DAY":
+        initialize();
+        break;
+      case "ONE_HOUR":
+        try{
+          File file =new File("D:\\Doordrishti\\" + aSection.getValueAsString() + "_" + mLocalDateTime + ".csv");
+          if(!file.exists()){
+            file.createNewFile();
+          }
+
+          FileWriter fw = new FileWriter(file,true);
+          BufferedWriter bw = new BufferedWriter(fw);
+          PrintWriter writer = new PrintWriter(bw);
+          StringBuilder sb = new StringBuilder();
+          for(Map.Entry<String,  ArrayList<Object>> entry :  cGroupRecordHashMap.entrySet()){
+            sb.append(LocalDateTime.now().format(cDateTimeFormatter));
+            sb.append(',');
+            sb.append(cGroupChannelHashMap.get(entry.getKey()));
+            sb.append(',');
+            sb.append(entry.getKey());
+            sb.append(',');
+
+            for( int i = 0; i < cColumnList.size(); i++){
+              ItemStatistic mItemStatistic = cGroupColumnItemNameHashMap.get(entry.getKey() + ":" + cColumnList.get(i).toString());
+              sb.append(mItemStatistic.getFunctionValue());
+              sb.append(',');
+              mItemStatistic.resetValue();
+            }
+
+            sb.append('\n');
+          }
+
+          writer.append(sb.toString());
+
+          writer.close();
+        } catch (Exception e) {
+          systemMessage(e.getMessage());
+        }
+        break;
+    }
+  }
+
+  class ItemStatistic{
+    public String cTagName;
+    public Signal cSignalControl = null;
+    public String cFunctionName;
+    public String cStatus  = null;
+    public Double cCurrentValue = 0.00;
+    public Double cGrandValueValue = 0.00;
+    public Double cFunctionValue = 0.00;
+    public int counter = 0;
+    public int cCountValue1 = 0;
+    public int cCountValue2 = 0;
+    public int cCountValue3 = 0;
+    public int cCountValue4 = 0;
+    public void updateFunctionValue(Signal signal){
+      Double value = signal.getValueAsDouble();
+      cCurrentValue = value;
+      switch (cFunctionName) {
+        case "Average":
+          cGrandValueValue += value;
+          counter++;
+          cFunctionValue = cGrandValueValue / counter;
+          break;
+        case "Peak":
+          if(value > cFunctionValue){
+            cFunctionValue = value;
+          }
+          break;
+        case "Low":
+          if(value < cFunctionValue){
+            cFunctionValue = value;
+          }
+          break;
+        case "Count1":
+           if(value ==1){
+            cCountValue1++;
+          }
+          break;
+        case "Count2":
+           if(value ==1){
+            cCountValue2++;
+          }
+          break;
+        case "Count3":
+           if(value ==1){
+            cCountValue3++;
+          }
+          break;
+        case "Count4":
+          if(value ==1){
+            cCountValue4++;
+          }
+          break;
+        case "Present1":
+        case "Present2":
+        case "Present3":
+        case "Present4":
+          cFunctionValue = value;
+          break;
+        case "Status":
+          cStatus = signal.getStatusText();
+          break;
+        default:
+          cFunctionValue = 0.00;
+      }
+    }
+
+    public void resetValue(){
+      cFunctionValue = cSignalControl.getValueAsDouble();
+      cCurrentValue = 0.00;
+      cGrandValueValue = 0.00;
+      counter = 0;
+      cCountValue1 = 0;
+           cCountValue2 = 0;
+           cCountValue3 = 0;
+           cCountValue4 = 0;
+    }
+
+    public Object getFunctionValue(){
+      Object mResult = null;
+
+      if(cFunctionName.equals("Status")){
+        mResult = cStatus;
+      }else if (cFunctionName.equals("Count1")) {
+        mResult = cCountValue1;
+        }else if (cFunctionName.equals("Count2")) {
+        mResult = cCountValue2;
+        }else if (cFunctionName.equals("Count3")) {
+        mResult = cCountValue3;
+        }else if (cFunctionName.equals("Count4")) {
+        mResult = cCountValue4;
+      }else{
+        mResult = cFunctionValue.intValue();
+      }
+
+      return mResult;
+    }
+  }
+
+  /**
+   * Static class to make sure that only one dss session is created
+   * for all classes extending this DB_B class.
+   */
+  static class dssInit {
+    static IDssSession cMainSession = null;
+    static Map<String, IDataSet> mapDatasets = new HashMap<>();
+
+    static synchronized IDssSession getDssSession() throws DssException {
+      if (cMainSession == null) {
+        Dss.init();
+        cMainSession = Dss.createSession();
+      }
+      return cMainSession;
+    }
+
+
+    static synchronized IDataSet getDataSet(String dataSetName) throws DssException {
+      IDataSet mDataset = null;
+      cMainSession = getDssSession();
+      mDataset = cMainSession.openDataSet(dataSetName, Dss.OPERATION_READ);
+      return mDataset;
+    }
+  }
+}
+

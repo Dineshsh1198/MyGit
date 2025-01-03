@@ -1,0 +1,42 @@
+
+import fasttools.processfast.*;
+
+/**
+* PROCESS/FAST Class Template.
+  */
+  public class CHECK_GSM extends ProcessClass {
+  // Attributes for GSM value and alarm
+  Attribute aGSMValue = defineStringAttributeForPrompt("GSM Value: ");
+  Attribute aAlarmValue = defineStringAttributeForPrompt("Alarm Value: "); // Boolean output for alarm
+  Attribute aLELValue = defineIntegerAttributeForPrompt("LEL Percentage: ");
+  // Signals for input GSM and output alarm
+  Signal sGSMValue = defineDoubleSignal(Signal.Trigger.VALUE); 
+  Signal sAlarmValue = defineIntegerSignal(Signal.Trigger.VALUE); // Boolean signal for alarm
+  Signal sLELValue = defineIntegerSignal(Signal.Trigger.VALUE);
+  double threshold = 20.0; // Threshold for triggering the alarm
+
+  public void create() {
+  // Attach the attribute values to the signals
+  attachItemToSignal(sGSMValue, aGSMValue.getValueAsString());
+  attachItemToSignal(sAlarmValue, aAlarmValue.getValueAsString());
+  attachItemToSignal(sLELValue, aLELValue.getValueAsString());  
+  }
+
+public void signalEvent(Signal signal) {
+// Get the real value from the signal
+double gsmValue = sGSMValue.getValueAsDouble();
+int LELValue = sLELValue.getValueAsInteger();
+      
+if (gsmValue > LELValue )
+{
+sAlarmValue.setValue(1);}
+      else {
+        sAlarmValue.setValue(0);}
+        
+
+      
+      
+    }
+}
+
+

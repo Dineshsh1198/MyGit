@@ -1,0 +1,33 @@
+import fasttools.processfast.*;
+
+/**
+ * PROCESS/FAST Class Template.
+ */
+public class CHECK_GSM_ALARM extends ProcessClass {
+    // Attributes for GSM value and alarm
+    Attribute aGSMValue = defineRealAttributeForPrompt("GSM Value: ");
+    Attribute aAlarmValue = defineBooleanAttributeForPrompt("Alarm Value: "); // Boolean output for alarm
+
+    // Signals for input GSM and output alarm
+    Signal sGSMValue = defineRealSignal(Signal.Trigger.VALUE); 
+    Signal sAlarmValue = defineBooleanSignal(Signal.Trigger.VALUE); // Boolean signal for alarm
+
+    double threshold = 20.0; // Threshold for triggering the alarm
+
+    public void create() {
+        // Attach the attribute values to the signals
+        attachItemToSignal(sGSMValue, aGSMValue.getValueAsReal());
+        attachItemToSignal(sAlarmValue, aAlarmValue.getValueAsBoolean());
+    }
+
+    public void signalEvent(Signal signal) {
+        // Get the real value from the signal
+        double gsmValue = sGSMValue.getValueAsReal();
+
+        // Determine if the alarm should be true or false
+        boolean alarm = gsmValue >= threshold;
+
+        // Set the alarm signal value
+        sAlarmValue.setValue(alarm);
+    }
+}
